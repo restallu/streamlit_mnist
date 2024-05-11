@@ -32,7 +32,7 @@ def chunks(L, n):
 def predecir_imagenes():
     st.empty()
     st.header('ALGORITMO DE TENSORFLOW-IDENTIFICACIÓN DE IMAGENES')
-    filename=r'.\trainedmodel.sav'
+    filename=r'./trainedmodel.sav'
     loaded_model=pickle.load(open(filename,'rb'))
     image_list=[]
     img_predicted=[]
