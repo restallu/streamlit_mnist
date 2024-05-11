@@ -1,7 +1,4 @@
 numpy
 streamlit
-PIL
-Image
 matplotlib
-pyplot
 streamlit_js_eval
