@@ -1,6 +1,5 @@
 numpy
 streamlit
-os
 PIL
 Image
 matplotlib
