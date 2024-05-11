@@ -120,7 +120,6 @@ def main():
     cargar_imagenes_0()
     cargar_image_loader()
     st.button("Hacer Prediccion",on_click=predecir_imagenes)
-    #st.button("Añadir a Modelo",on_click=createModelAdd)
 
 if __name__=='__main__':
     main()
