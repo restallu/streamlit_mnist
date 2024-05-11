@@ -15,7 +15,7 @@ import csv
 IMG_HEIGHT=28
 IMG_WIDTH=28
 
-img_folder=r'.\numeros'
+img_folder=r'./numeros'
 predicciones=[]
 
 def chunks(L, n):
