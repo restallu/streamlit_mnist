@@ -1,4 +1,3 @@
-aopencv-contrib-python-headless
 numpy
 streamlit
 matplotlib
