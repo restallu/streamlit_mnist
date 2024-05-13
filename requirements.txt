@@ -1,5 +1,6 @@
-opencv-contrib-python-headless
+aopencv-contrib-python-headless
 numpy
 streamlit
 matplotlib
 streamlit_js_eval
+keras
