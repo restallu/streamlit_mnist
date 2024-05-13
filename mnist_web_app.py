@@ -36,7 +36,7 @@ def predecir_imagenes():
     st.empty()
     st.header('ALGORITMO DE TENSORFLOW-IDENTIFICACIÓN DE IMAGENES')
     filename=r'./trainedmodel.sav'
-    loaded_model=pickle.load(open(filename,'rb'))
+   # loaded_model=pickle.load(open(filename,'rb'))
     image_list=[]
     img_predicted=[]
     img_predicted=np.array(img_predicted)
