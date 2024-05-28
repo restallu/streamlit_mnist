@@ -4,3 +4,4 @@ streamlit
 matplotlib
 streamlit_js_eval
 keras
+tensorflow
