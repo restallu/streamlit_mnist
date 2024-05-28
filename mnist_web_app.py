@@ -87,7 +87,7 @@ def predecir_imagenes():
         image_list.append(image)
         file_list.append(file)
     image_np_array=np.array(image_list)
-    image_np_array=image_np_array.reshape(-1,IMG_HEIGHT,IMG_WIDTH,1)
+    image_np_array=image_np_array.reshape(-1,IMG_HEIGHT*IMG_WIDTH)
     preds=loaded_model.predict(image_np_array).round().astype(int)
     flat_pred=[item for sublist in preds for item in sublist]
     #cargar_imagenes_1(chunks(flat_pred,10),image_list)
