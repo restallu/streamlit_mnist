@@ -1,105 +1,26 @@
+import streamlit as st
+import os
+import cv2
 import pickle
 import numpy as np
-import streamlit as st
-import cv2
-import PIL
-import os
-from PIL import Image
-import matplotlib
-from  matplotlib import pyplot as plt
-import matplotlib.image as mpimg
+import shutil
+import random
 from streamlit_js_eval import streamlit_js_eval
+from typing import TypedDict
 
+class Sample(TypedDict):
+    i: np.ubyte
+    imagen: np.ndarray
+
+
+path="./numeros/"
+img_folder="./numeros/"
 IMG_HEIGHT=28
 IMG_WIDTH=28
 
-img_folder=r'./numeros'
-predicciones=[]
+def cargar_home():
 
-# Devuelve los valores de las prediccinones. El valor de la predicción corresponde
-# a la posición de la neurona que presenta el maximo valor de las 10 neuronas de salida
-
-def chunks(L, n):
-    cadena=""
-    #st.write("The numbers predicted are:",end=', ')
-    for i in range(0, len(L), n):  
-        mylist=L[i:i+n]
-        max_index, max_value = max(enumerate(mylist), key=lambda x: x[1])
-        predicciones.append(max_index)
-        cadena=cadena + str(max_index) + ', '           
-    #st.write(cadena)
-    return predicciones
-
-# En esta función se desserializa el modelo y se aplica a las muestras de validación
-
-def predecir_imagenes():
-    st.empty()
-    st.header('ALGORITMO DE TENSORFLOW-IDENTIFICACIÓN DE IMAGENES')
-    filename=r'./trainedmodel.sav'
-    loaded_model=pickle.load(open(filename,'rb'))
-    image_list=[]
-    img_predicted=[]
-    img_predicted=np.array(img_predicted)
-    for file in os.listdir(img_folder):
-        image=cv2.imread(os.path.join(img_folder, file),cv2.IMREAD_GRAYSCALE)  
-        try:
-            image=cv2.resize(image, (IMG_HEIGHT,IMG_WIDTH),interpolation = cv2.INTER_AREA)
-        except:
-            break
-        image=np.array(image)
-        image = image.astype('float32')
-        image /= 255 
-        image_list.append(image)
-    image_np_array=np.array(image_list)
-    image_np_array=image_np_array.reshape(-1,IMG_HEIGHT*IMG_HEIGHT)
-    preds=loaded_model.predict(image_np_array).round().astype(int)
-    flat_pred=[item for sublist in preds for item in sublist]
-    cargar_imagenes_1(chunks(flat_pred,10))
-    st.write("Predicting finished")
-    return image_list
-
-# Carga o presentación inicial de imágenes
-
-def cargar_imagenes_0():
-    for file in os.listdir(img_folder):      
-        imagen=mpimg.imread(os.path.join(img_folder, file))     
-        st.image(imagen)
-        st.write(file)
-
-# Carga de imágenes con predicción hecha
-
-def cargar_imagenes_1(predicciones):
-    k=1000
-    i=0
-    for file in os.listdir(img_folder):      
-        imagen=mpimg.imread(os.path.join(img_folder, file))
-        st.image(imagen)
-        st.write(file)
-        st.text_input(label="Predicción",key=k,max_chars=1,value=predicciones[i])
-        k=k+1
-        i=i+1
-    cargar_image_loader()
-    st.button("Hacer Prediccion",on_click=predecir_imagenes)
-    for i in range(20):
-        st.write(' ')
-
-#Logica asociada al widget de adición de nuevas imágenes
-
-def cargar_image_loader():
-        uploaded_file=st.file_uploader("Puede añadir sus propias muestras para predecir. Seran reducidas a 28x28 pixels:")
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file)
-            st.image(image, caption=uploaded_file.name)
-            try:
-                with (open(os.path.join(img_folder,uploaded_file.name), 'wb')) as f:
-                    image.save(os.path.join(img_folder,uploaded_file.name))
-            except:
-                raise IOError
-            st.write('Fichero guardado')  
-            streamlit_js_eval(js_expressions="parent.window.location.reload()")   
-            
-def main():
-    
+    st.write("INICIO PROGRAMA")
     st.sidebar.image('nist.png',use_column_width=False,)
     st.sidebar.text('La base de datos MNIST por sus' )
     st.sidebar.text('siglas en inglés, Modified National') 
@@ -117,11 +38,102 @@ def main():
     st.write('60.000 muestras procedentes de la escritura de 300 personas. ')
     st.write('A continuación se muestran algunas imágenes. ')
     st.write('Pulse sobre HACER PREDICCION')
-    cargar_imagenes_0()
-    cargar_image_loader()
-    st.button("Hacer Prediccion",on_click=predecir_imagenes)
+          
+def callbackfunct(u,image,p,f):
+    elementToAddToModel:Sample={"i":np.ubyte(u), "imagen":image}
+    filename="./corrmod/dict"+str(random.randint(0, 99))+".sav"
+    pickle.dump(elementToAddToModel,open(filename,'wb'))
+    setFileProcessed(f)
+
+
+def setFileProcessed(fichero):
+    shutil.move("./numeros/"+fichero, "./processed")
+    streamlit_js_eval(js_expressions="parent.window.location.reload()")
+
+def chunks(L, n):
+    predicciones=[]
+    for i in range(0, len(L), n):  
+        mylist=L[i:i+n]
+        max_index, max_value = max(enumerate(mylist), key=lambda x: x[1])
+        predicciones.append(max_index)       
+    return predicciones
+
+
+def is_directory_empty(path):
+    if os.path.exists(path) and os.path.isdir(path):
+        if not os.listdir(path):
+            return True
+        else:
+            return False
+        
+def predecir_imagenes():
+    #st.image(cv2.imread("tf.png"))
+    #st.header('ALGORITMO DE TENSORFLOW-IDENTIFICACIÓN DE IMAGENES')
+    filename=r'./trainedmodel.sav'
+    loaded_model=pickle.load(open(filename,'rb'))
+    file_list=[]
+    image_list=[]
+    img_predicted=[]
+    img_predicted=np.array(img_predicted)
+    for file in os.listdir(img_folder):
+        image=cv2.imread(os.path.join(img_folder, file),cv2.IMREAD_GRAYSCALE)  
+        try:
+            image=cv2.resize(image, (IMG_HEIGHT,IMG_WIDTH),interpolation = cv2.INTER_AREA)
+        except:
+            break
+        image=np.array(image)
+        image = image.astype('float32')
+        image /= 255 
+        image_list.append(image)
+        file_list.append(file)
+    image_np_array=np.array(image_list)
+    image_np_array=image_np_array.reshape(-1,IMG_HEIGHT,IMG_WIDTH,1)
+    preds=loaded_model.predict(image_np_array).round().astype(int)
+    flat_pred=[item for sublist in preds for item in sublist]
+    #cargar_imagenes_1(chunks(flat_pred,10),image_list)
+    cargar_predicciones(chunks(flat_pred,10),image_list,file_list)
+    #st.button("Añadir a Modelo",on_click=addToModel)
+    st.write("Predicting finished")
+    return image_list
+
+def cargar_predicciones(predicciones,image_list,file_list):
+    i=0
+    cargar_home()
+    for image,file in zip(image_list,file_list):
+            col1,col2=st.columns([1,1])
+            with col1:
+                st.image(image)
+                st.write(file)
+            with col2:
+                submitted2=st.button("Next",key=f"Button-{str(i)}")
+                if submitted2:
+                    setFileProcessed(file)
+            with st.form (f"MyForm-{str(i)}"):
+                st.text_input("Predicción Realizada:",value=predicciones[i],disabled=True)
+                user_input=st.text_input("Predicción Correcta:")
+                submitted=st.form_submit_button("Añadir a modelo")
+                if submitted:
+                    callbackfunct(user_input,image,predicciones[i],file)
+            i=i+1
+
+def presentar_imagenes():
+    cargar_home()
+    col1,col2=st.columns([1,1])
+    for file in os.listdir(path):
+        img=cv2.imread(os.path.join(path,file),cv2.IMREAD_GRAYSCALE)      
+        with col1: 
+            st.image(img)
+        with col2: 
+            st.write(file)
+    submitted=st.button("Predecir Set")
+    if submitted:
+        predecir_imagenes()
+def main():
+    
+    predecir_imagenes()
+
+
+
 
 if __name__=='__main__':
     main()
-
-  
